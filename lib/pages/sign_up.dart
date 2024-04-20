@@ -1,9 +1,11 @@
-import 'dart:developer';
 
+import 'package:barbar_booking_app/pages/home_page.dart';
 import 'package:barbar_booking_app/pages/login.dart';
+import 'package:barbar_booking_app/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:random_string/random_string.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -61,6 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           style: TextStyle(
                               color: Color(0xFFB91635), fontSize: w * 0.05)),
                       TextFormField(
+                        controller: _name,
                         validator: (name) {
                           if (name != null &&
                               name.trimLeft().trimRight().isEmpty) {
@@ -80,6 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               color: const Color(0xFFB91635),
                               fontSize: w * 0.05)),
                       TextFormField(
+                        controller: _emailController,
                         validator: (email) {
                           /// Validate email
                           return validateEmail(email);
@@ -95,6 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               color: const Color(0xFFB91635),
                               fontSize: w * 0.05)),
                       TextFormField(
+                        controller: _passwordController,
                         validator: (pass) {
                           /// Password validation
                           return validatePass(pass);
@@ -111,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       GestureDetector(
                         onTap: () {
                           if (_fromKey.currentState!.validate()) {
-                            registration(w);
+                            registration(w, context);
                           }
                         },
                         child: Container(
@@ -177,20 +182,33 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  registration(double w) async {
+  registration(double w, context) async {
     try {
+      var email = _emailController.text.toString();
+      var password = _passwordController.text.toString();
       UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: _emailController.text.toString(), password: _passwordController.text.toString());
+          .createUserWithEmailAndPassword(email: email, password: password);
 
+      String id = randomAlphaNumeric(10);
+      Map<String, dynamic> userInfo = {
+        "Name": _name.text,
+        "Email": email,
+        "id": id,
+        "image": ""
+      };
+      await DatabaseMethods().addDetail(userInfo, id);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           "Registration Successfully",
           style: TextStyle(fontSize: w * 0.04),
         ),
       ));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ));
     } on FirebaseException catch (e) {
-      log(e.toString());
       if (e.code == "weak-password") {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(

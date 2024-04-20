@@ -1,33 +1,18 @@
-import 'dart:developer';
-
-import 'package:barbar_booking_app/pages/booking_page.dart';
-import 'package:barbar_booking_app/pages/home_page.dart';
-import 'package:barbar_booking_app/pages/login.dart';
 import 'package:barbar_booking_app/pages/sign_up.dart';
-import 'package:barbar_booking_app/pages/splash_page.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FirebaseOptions firebaseOptions = const FirebaseOptions(
-    apiKey: "AIzaSyDUwM8xjCrXPY4LZZHrgy0P9te-ghQLx6A",
-    appId: "1:500724793465:android:e339ce758c8f01081054a8",
-    messagingSenderId: "500724793465",
-    projectId: "barbar--app",
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyAim4MaVMaFEsoDuzmsfxdEzEVGoShr288",
+      appId: "1:346843429346:android:b09ca18ce1ada7ca0f61bb",
+      messagingSenderId: "346843429346",
+      projectId: "barbar-app-c6842",
+    ),
   );
-
-  try {
-    await Firebase.initializeApp(
-        options: firebaseOptions
-    );
-    runApp(const MyApp());
-  }
-  catch (e)
-  {
-log(e.toString());
-  }
-
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -37,13 +22,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-
-      ),
-      home: const SignUpPage()
-    );
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(),
+        home: const SignUpPage());
   }
 }
-

@@ -1,4 +1,9 @@
+
+
+import 'package:barbar_booking_app/pages/home_page.dart';
 import 'package:barbar_booking_app/pages/sign_up.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,12 +15,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _name = TextEditingController();
   final _fromKey = GlobalKey<FormState>();
 
+  loginUser(w, context) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text, password: _passwordController.text);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ));
+    } on FirebaseException catch (e) {
+      if (e.code == "user-not-found") {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            "User not found!!",
+            style: TextStyle(fontSize: w * 0.04),
+          ),
+        ));
+      } else if (e.code == "wrong-password") {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            "Wrong password!!",
+            style: TextStyle(fontSize: w * 0.04),
+          ),
+        ));
+      }
+    }
+  }
 
   String? validateEmail(String? email) {
     if (email!.trimRight().trimLeft().isEmpty) {
@@ -83,9 +114,12 @@ class _LoginPageState extends State<LoginPage> {
                     Text("Gmail",
                         style: TextStyle(
                             color: Color(0xFFB91635), fontSize: w * 0.05)),
-                     TextFormField(
-                      validator: (email){
-                        return validateEmail(email);  /// Email Validation
+                    TextFormField(
+                      controller: _emailController,
+                      validator: (email) {
+                        return validateEmail(email);
+
+                        /// Email Validation
                       },
                       decoration: const InputDecoration(
                           hintText: "Gmail", prefixIcon: Icon(Icons.mail)),
@@ -96,8 +130,9 @@ class _LoginPageState extends State<LoginPage> {
                     Text("Password",
                         style: TextStyle(
                             color: Color(0xFFB91635), fontSize: w * 0.05)),
-                     TextFormField(
-                      validator: (pass){
+                    TextFormField(
+                      controller: _passwordController,
+                      validator: (pass) {
                         return validatePass(pass);
                       },
                       decoration: const InputDecoration(
@@ -114,30 +149,28 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         Text("Forgot Password?",
                             style: TextStyle(
-                                color: Color(0xFF311937), fontSize: w * 0.05)),
+                                color: const Color(0xFF311937), fontSize: w * 0.05)),
                       ],
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     GestureDetector(
-                      onTap: (){
-                        if(_fromKey.currentState!.validate())
-                          {
-
-                          }
+                      onTap: () {
+                        if (_fromKey.currentState!.validate()) {
+                          loginUser(w, context);
+                        }
                       },
                       child: Container(
                         padding: EdgeInsets.all(10),
                         width: w,
                         decoration: BoxDecoration(
                             gradient: const LinearGradient(colors: [
-                          Color(0xFFB91635),
-                          Color(0xFF621d3c),
-                          Color(0xFF311937)
-                        ]),
-                          borderRadius: BorderRadius.circular(10)
-                        ),
+                              Color(0xFFB91635),
+                              Color(0xFF621d3c),
+                              Color(0xFF311937)
+                            ]),
+                            borderRadius: BorderRadius.circular(10)),
                         child: Center(
                           child: Text(
                             "SIGN IN",
@@ -149,19 +182,35 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Don't have an Account?", style: TextStyle(fontSize: w * 0.04, ),),
-                        const SizedBox(width: 5,),
+                        Text(
+                          "Don't have an Account?",
+                          style: TextStyle(
+                            fontSize: w * 0.04,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
                         GestureDetector(
-                          onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) {
-                              return const SignUpPage();
-                            },));
-                          },
-                            child: Text("SIGN UP", style: TextStyle(fontSize: w * 0.05, ),)),
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return const SignUpPage();
+                                },
+                              ));
+                            },
+                            child: Text(
+                              "SIGN UP",
+                              style: TextStyle(
+                                fontSize: w * 0.05,
+                              ),
+                            )),
                       ],
                     )
                   ],

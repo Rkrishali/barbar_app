@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "500724793465",
-    "project_id": "barbar--app",
-    "storage_bucket": "barbar--app.appspot.com"
+    "project_number": "346843429346",
+    "project_id": "barbar-app-c6842",
+    "storage_bucket": "barbar-app-c6842.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:500724793465:android:e339ce758c8f01081054a8",
+        "mobilesdk_app_id": "1:346843429346:android:b09ca18ce1ada7ca0f61bb",
         "android_client_info": {
           "package_name": "com.example.barbar_booking_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDUwM8xjCrXPY4LZZHrgy0P9te-ghQLx6A"
+          "current_key": "AIzaSyAim4MaVMaFEsoDuzmsfxdEzEVGoShr288"
         }
       ],
       "services": {
