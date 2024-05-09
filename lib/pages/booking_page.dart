@@ -1,46 +1,63 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:developer';
+import 'package:barbar_booking_app/providers/ProgressBarProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/database.dart';
+import '../services/shared_prefrences.dart';
 
 class BookingPage extends StatefulWidget {
   String service;
+  String userName;
 
-  BookingPage({required this.service, super.key});
+  BookingPage({required this.userName, required this.service, super.key});
 
   @override
   State<BookingPage> createState() => _BookingPageState();
 }
 
 class _BookingPageState extends State<BookingPage> {
-  final DateTime _currentDate = DateTime.now();
   final ValueNotifier<DateTime> selectedDate = ValueNotifier(DateTime.now());
   final ValueNotifier<TimeOfDay> selectedTime = ValueNotifier(TimeOfDay.now());
+  String? userName = "";
+  String? email = "";
+  ProgressBarProvider? provider;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate.value,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2120),
     );
     if (picked != null && picked != selectedDate.value) {
-      selectedDate.value = picked;
+      setState(() {
+        selectedDate.value = picked;
+      });
     }
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+    final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: selectedTime.value,
+      initialTime: TimeOfDay.now(),
     );
-    if (picked != null && picked != selectedTime.value) {
-      selectedTime.value = picked;
+    if (pickedTime != null && pickedTime != selectedTime.value) {
+      setState(() {
+        selectedTime.value = pickedTime;
+      });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
+    provider = Provider.of<ProgressBarProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: const Color(0xFF2b1615),
       appBar: AppBar(
@@ -164,7 +181,7 @@ class _BookingPageState extends State<BookingPage> {
                               width: 10,
                             ),
                             Text(
-                              "${selectedTime.hour}:${selectedTime.minute} ${selectedTime.period.name.toUpperCase()}",
+                              selectedTime.format(context),
                               style: TextStyle(
                                   color: Colors.white, fontSize: w * 0.07),
                             )
@@ -175,18 +192,71 @@ class _BookingPageState extends State<BookingPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 30,),
-              Container(
-                margin: EdgeInsets.only(bottom: 10),
-                width: w,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(10)
+              const SizedBox(
+                height: 30,
+              ),
+              GestureDetector(
+                onTap: () async {
+                  final time = "${selectedTime.value.format(context)}";
+                  final email =
+                      await DatabaseMethods().getEmailByName(widget.userName);
+                  final date =
+                      "${selectedDate.value.day}/${selectedDate.value.month}/${selectedDate.value.year}";
+                  Map<String, dynamic> booking = {
+                    "Service": widget.service,
+                    "Date": date,
+                    "Time": time,
+                    "User": widget.userName,
+                    "Image": "",
+                    "Email": email
+                  };
+                  provider!.changeLogging();
+                  final isSaved =
+                      await DatabaseMethods().addUserBooking(booking);
+
+                  if (isSaved) {
+                    provider!.changeLogging();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                        "Service has been booked successfully!",
+                        style: TextStyle(fontSize: w * 0.04),
+                      ),
+                    ));
+                  } else {
+                    provider!.changeLogging();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                        "Slot isn't available",
+                        style: TextStyle(fontSize: w * 0.04),
+                      ),
+                    ));
+                  }
+                },
+                child: Consumer<ProgressBarProvider>(
+                  builder: (context, value, child) => Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    width: w,
+                    height: 60,
+                    decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                        child: value.isLoading
+                            ? Container(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                "Get a Stylish HairCut",
+                                style: TextStyle(
+                                    fontSize: w * 0.06, color: Colors.white),
+                              )),
+                  ),
                 ),
-                child: Center(child: Text("Get a Stylish HairCut", style: TextStyle(fontSize: w * 0.06, color: Colors.white),)),
               )
-          
             ],
           ),
         ),

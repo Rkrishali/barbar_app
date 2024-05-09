@@ -39,6 +39,9 @@ dependencies:
   firebase_auth: ^4.17.4
   firebase_core: ^2.25.4
   random_string: ^2.3.1
+  shared_preferences:
+  intl:
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

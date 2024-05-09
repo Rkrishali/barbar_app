@@ -1,6 +1,8 @@
-import 'package:barbar_booking_app/pages/sign_up.dart';
+import 'package:barbar_booking_app/pages/admin_booking.dart';
+import 'package:barbar_booking_app/providers/ProgressBarProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +14,14 @@ void main() async {
       projectId: "barbar-app-c6842",
     ),
   );
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (context) => ProgressBarProvider(),
+      )
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,6 +34,6 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(),
-        home: const SignUpPage());
+        home: const AdminBooking());
   }
 }

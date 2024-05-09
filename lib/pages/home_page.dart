@@ -1,17 +1,59 @@
+import 'dart:developer';
 import 'package:barbar_booking_app/pages/booking_page.dart';
+import 'package:barbar_booking_app/pages/sign_up.dart';
+import 'package:barbar_booking_app/services/shared_prefrences.dart';
 import 'package:flutter/material.dart';
+import '../services/database.dart';
+import '../utils/confirmation_dialog.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final email;
+
+  const HomePage({required this.email, super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  String? userName = "";
+
+  void getUserName() async {
+    try {
+      userName =
+          await DatabaseMethods().getNameByEmail(widget.email.toString());
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// Getting Name of the user who is loged in
+    getUserName();
+  }
+
+  void showLogoutDialog(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ConfirmLogoutDialog(
+        onLogout: () async {
+          await SharedPreferencesHelper().clearUserId();
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SignUpPage(),
+              ));
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
     final w = MediaQuery.of(context).size.width;
     List<String> imageList = [];
     List<String> serviceNameList = [];
@@ -28,6 +70,7 @@ class _HomePageState extends State<HomePage> {
     imageList.add("assets/images/facials.png");
     imageList.add("assets/images/hair.png");
     imageList.add("assets/images/kids.png");
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: const Color(0xFF2b1615),
@@ -36,6 +79,23 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                      onPressed: () async {
+                        /// Logout user
+                        showLogoutDialog(context);
+                      },
+                      icon: const Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                      ))
+                ],
+              ),
+              const Divider(
+                color: Colors.white,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -49,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                             fontSize: w * 0.06),
                       ),
                       Text(
-                        "Aman Singh Rawat",
+                        "$userName",
                         style:
                             TextStyle(color: Colors.white, fontSize: w * 0.06),
                       )
@@ -96,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  BookingPage(service: serviceNameList[index]),
+                                  BookingPage(userName:userName.toString(), service: serviceNameList[index]),
                             ));
                       },
                       child: Container(
